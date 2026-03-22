@@ -1,0 +1,10 @@
+[project]
+name = "mycelium-memoirs"
+version = "0.1.0"
+description = "A personal archive at the intersection of consciousness, fungi, and art."
+requires-python = ">=3.10"
+dependencies = [
+    "faster-whisper>=1.0.0",
+    "openai>=1.0.0",
+    "python-dotenv>=1.0.0",
+]
