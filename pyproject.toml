@@ -1,7 +1,7 @@
 [project]
 name = "mycelium-memoirs"
 version = "0.1.0"
-description = "A personal archive at the intersection of consciousness, fungi, and art."
+description = "Creative pipeline: spoken experience reports → stories, image prompts, and video prompts."
 requires-python = ">=3.10"
 dependencies = [
     "faster-whisper>=1.0.0",
