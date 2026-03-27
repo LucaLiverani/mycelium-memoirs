@@ -93,25 +93,38 @@ def generate_images(prompts: list[str], output_dir: Path, version: str):
         print(f"    Saved: {image_path}")
 
 
-def extend_video(client: OpenAI, video_id: str, prompt: str, seconds: int):
+def extend_video(client: OpenAI, video_id: str, prompt: str, seconds: int, retries: int = 3):
     """Extend a video using raw HTTP POST to avoid SDK multipart bug."""
     import httpx
 
-    response = httpx.post(
-        "https://api.openai.com/v1/videos/extensions",
-        headers={
-            "Authorization": f"Bearer {client.api_key}",
-            "Content-Type": "application/json",
-        },
-        json={
-            "prompt": prompt,
-            "seconds": seconds,
-            "video": {"id": video_id},
-        },
-        timeout=60,
-    )
-    response.raise_for_status()
-    return response.json()
+    for attempt in range(1, retries + 1):
+        response = httpx.post(
+            "https://api.openai.com/v1/videos/extensions",
+            headers={
+                "Authorization": f"Bearer {client.api_key}",
+                "Content-Type": "application/json",
+            },
+            json={
+                "prompt": prompt,
+                "seconds": str(seconds),
+                "video": {"id": video_id},
+            },
+            timeout=60,
+        )
+        if response.status_code == 200:
+            return response.json()
+
+        error_body = response.text
+        print(f"    Extension API error (attempt {attempt}/{retries}): {response.status_code}")
+        print(f"    {error_body}")
+
+        if attempt < retries:
+            wait = 15 * attempt
+            print(f"    Retrying in {wait}s...")
+            time.sleep(wait)
+
+    print("    All retries failed.")
+    raise SystemExit(1)
 
 
 def generate_video(prompts: list[str], output_dir: Path, version: str, start_from: int = 1):
